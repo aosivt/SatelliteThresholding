@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact name="SatelliteThresholding:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/SatelliteThresholding_jar</output-path>
+    <root id="root">
+      <element id="archive" name="SatelliteThresholding.jar">
+        <element id="module-output" name="SatelliteThresholding" />
+      </element>
+      <element id="library" level="project" name="datanucleus-api-jdo-3.2.6" />
+    </root>
+  </artifact>
+</component>
