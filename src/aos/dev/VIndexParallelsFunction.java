@@ -1,13 +1,13 @@
 package aos.dev;
 
+import aos.ConverterBytes.ConverByteToObject;
 import aos.ConverterBytes.NumberUtil;
 
-import java.nio.Buffer;
+import java.io.ByteArrayInputStream;
+import java.io.ObjectInputStream;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 import java.util.Arrays;
-import java.util.stream.DoubleStream;
+import java.util.List;
 import java.util.stream.IntStream;
 
 /**
@@ -38,9 +38,10 @@ public class VIndexParallelsFunction {
         }
 
         this.switch_case_function = switch_case_function;
-        this.result = new byte[nred.length*4];
+        this.result = new byte[nred.length];
 
     }
+
 
 
     public byte[] constructReseach()
@@ -60,20 +61,38 @@ public class VIndexParallelsFunction {
         try {
         System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "20");
 
-            IntStream.range(0, this.red.length)
+            ConverByteToObject objectsRed = new ConverByteToObject(this.red);
+            ConverByteToObject objectsNRed = new ConverByteToObject(this.nred);
+
+
+
+            IntStream.range(0, objectsRed.getSizeArray())
             .parallel().
             forEach(
             (i)->
             {
 //                System.err.println("Current: " + Thread.currentThread());
 //                System.err.println("Active: " + Thread.activeCount());
-                float test =
-                ((float) NumberUtil.getIntFromBytes(new byte[]{0, 0, 0, this.nred[i]}, true) -
-                (float) NumberUtil.getIntFromBytes(new byte[]{0, 0, 0, this.red[i]}, true))
-                /
-                ((float) NumberUtil.getIntFromBytes(new byte[]{0, 0, 0, this.nred[i]}, true) +
-                (float) NumberUtil.getIntFromBytes(new byte[]{0, 0, 0, this.red[i]}, true));
+//                float test =
+//                ((float) NumberUtil.getIntFromBytes(new byte[]{0, 0, 0, this.nred[i]}, true) -
+//                (float) NumberUtil.getIntFromBytes(new byte[]{0, 0, 0, this.red[i]}, true))
+//                /
+//                ((float) NumberUtil.getIntFromBytes(new byte[]{0, 0, 0, this.nred[i]}, true) +
+//                (float) NumberUtil.getIntFromBytes(new byte[]{0, 0, 0, this.red[i]}, true));
 
+                float test = Float.NaN;
+                try {
+                    test =
+                            (
+                                    (objectsNRed.getDataPixelImage(i) -
+                                    (objectsRed.getDataPixelImage(i)))
+                                            /
+                            (
+                                    ((objectsNRed.getDataPixelImage(i) +
+                                    (objectsRed.getDataPixelImage(i)))))
+                            );
+                }
+                catch (Exception e) {}
 
                 this.FillingResultArray(test,i);
             }
@@ -191,7 +210,28 @@ public class VIndexParallelsFunction {
     {
         System.arraycopy(NumberUtil.getBytesFromFloat(input,false),0, this.result,index_array*4,4);
     }
+
+    private List<?> convertValueFromObjectDataImage(byte[] _byteObjectDataImage)
+    {
+        List<?> clone = null;
+        ObjectInputStream ois = null;
+        try {
+            ByteArrayInputStream bis = new ByteArrayInputStream(_byteObjectDataImage);
+            ois = new ObjectInputStream(bis);
+            clone = (List<?>) ois.readObject();
+            ois.close();
+            bis.close();
+            return clone;
+        }
+        catch (Exception e) {
+            System.err.print("Unable to deep copy object");
+            return  null;
+        }
+    }
+
+
 }
+
 
 
 

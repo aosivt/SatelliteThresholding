@@ -2,6 +2,8 @@ package aos.dev;
 
 import aos.ConverterBytes.NumberUtil;
 
+import java.io.ByteArrayInputStream;
+import java.io.ObjectInputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -38,6 +40,10 @@ public class VIndexFunctions {
 
         ByteBuffer result_byte_array = ByteBuffer.allocate(dataB3.length*4);
         result_byte_array.position(0);
+
+
+
+
         for (int indF=0;indF<dataB3.length;indF++)
         {
             Integer valueArrayB3 = NumberUtil.getIntFromBytes(new byte[]{0,0,0,dataB3[indF]}, true);
